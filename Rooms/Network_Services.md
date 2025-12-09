@@ -1,4 +1,4 @@
-###SMB (Server Message Block) Protocol ---> Port(139/445): 
+#SMB (Server Message Block) Protocol ---> Port(139/445): 
 Ek protocol jo  access share in files, printers, and other resources karne me maddat karnta hai between client-server. 
 It can also carry transaction protocols for interprocess communication means ye "Transport Layer" ki trha bhi work kar sakta hai! for structured exchange of information.
 It's a Response-Request Protocol : 
