@@ -72,9 +72,6 @@ Tools used for enumeration:
 - `nmap --script smb-*`
 
 ---
-
-## 🧪 Viva-Friendly Short Answer
-
 **Q. What is NetBIOS-SSN?**  
 NetBIOS Session Service (Port 139) Windows networking service hai jisse **file/printer sharing** hoti hai. Yeh SMB ko purane NetBIOS protocol par chalata hai aur attackers isko enumeration ke liye target karte hain.
 
