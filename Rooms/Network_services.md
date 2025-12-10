@@ -24,3 +24,70 @@ SMB **inter-process communication (IPC)** ke liye bhi use ho sakta hai, matlab y
 - **File Sharing**: SMB file sharing ko easy banata hai network par.
 - **Printer Sharing**: SMB printers ko network par share karne ke liye use hota hai.
 - **Network Communication**: Ye inter-process communication ke liye bhi use hota hai, jisme applications ke beech data exchange hota hai.
+
+## 📌 What is NetBIOS-SSN?
+NetBIOS-SSN ka full form **NetBIOS Session Service** hai.  
+Yeh Windows systems ko network me **file sharing, printer sharing**, aur communication ke liye allow karta hai.
+
+- Protocol: NetBIOS over TCP/IP  
+- Port: **TCP 139**
+
+---
+
+### 🔹 1. NetBIOS ka kaam kya hai?
+- Computer ke naam ko IP se map karta hai.  
+- File sharing enable karta hai.  
+- Printer sharing enable karta hai.  
+- Windows computers ko discover karne me help karta hai.
+
+### 🔹 2. SSN (Session Service) kya karta hai?
+Session Service ek proper **connection/session banata hai**, jisse data share ho sakta hai.
+
+---
+
+## 💻 Port 139 kab use hota hai?
+Jab Windows system **SMB (Server Message Block) over NetBIOS** use karta hai.  
+Modern systems zyada tar **SMB over 445** use karte hain, lekin port 139 abhi bhi mil jata hai.
+
+---
+
+## 🛡 Cybersecurity Perspective
+
+Port **139 open** milne ka matlab:
+
+- System **SMB file sharing** run kar raha hai.  
+- Purana NetBIOS protocol use ho raha hai.  
+- Aap enumeration kar sakte ho:
+
+  - User list  
+  - Shared folders  
+  - Domain info  
+  - Password policy  
+  - Groups  
+
+Tools used for enumeration:
+- `enum4linux`
+- `smbclient`
+- `rpcclient`
+- `nmap --script smb-*`
+
+---
+
+## 🧪 Viva-Friendly Short Answer
+
+**Q. What is NetBIOS-SSN?**  
+NetBIOS Session Service (Port 139) Windows networking service hai jisse **file/printer sharing** hoti hai. Yeh SMB ko purane NetBIOS protocol par chalata hai aur attackers isko enumeration ke liye target karte hain.
+
+---
+
+## 🔄 Bonus: Port 139 vs Port 445
+
+| Feature | Port 139 | Port 445 |
+|--------|----------|-----------|
+| Protocol | SMB over NetBIOS | SMB directly over TCP |
+| Old/New | Purana | Modern |
+| OS Discovery | Yes | Yes |
+| Attack Surface | High | High |
+
+---
+
