@@ -1,4 +1,4 @@
-# CyberSecurity_Fundamentals_and _Paths
+# CyberSecurity Fundamentals and Paths
 
 ##  Offensive Security
 
