@@ -7,5 +7,19 @@ dir
 ```
 dir /a
 ```
+# to search file 
+```
+dir /s filename.ext
+```
+
+# to get the hostname
+```
+hostname
+```
+
+# to get info about system 
+```
+systeminfo
+```
 
 
