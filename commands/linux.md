@@ -44,8 +44,43 @@
      ```
      ex: wget  https://assets.tryhackme.com/additional/linux-fundamentals/part3/myfile.txt
      ```
+
+    
 5.  Transferring Files From Your Host - SCP (SSH)
 
     ```
     ex : scp important.txt ubuntu@192.168.1.30:/home/ubuntu/transferred.txt
     ```
+
+6. processes
+    1. to see the processes running in current user 
+    ```
+    ps
+    ```
+    
+    2. to see all the processes running by all the user
+    ```
+    ps aux
+    ```
+
+    3. this gives you real-time statistics about the processes running on your system instead of a one-time view.
+    ```
+    top
+    ```
+
+    4. to kill a process
+    ```
+    kill PSID
+    ```
+
+    5. Getting processes/services to start on BOOT
+       ```
+       systemctl [option] [service]
+       ```
+       options:
+         1. Start
+         2. Stop
+         3. Enable
+         4. Disable
+         5. Status
+    
