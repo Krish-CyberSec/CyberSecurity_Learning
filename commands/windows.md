@@ -27,8 +27,12 @@ more file_name
 ```
 tasklist
 ```
+## 7. To kill a process
+```
+taskkill /PID the_PID_number
+```
 
-## 7. Filter Running Processes
+## 8. Filter Running Processes
 
 Filters the process list to find a specific process.
 
