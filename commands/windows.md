@@ -40,3 +40,34 @@ Filters the process list to find a specific process.
 tasklist /FI "imagename eq sshd.exe"
 ```
 
+## 9. checks the file system and disk volumes for errors and bad sectors
+```
+chkdsk
+```
+
+## 10. displays a list of installed device drivers.
+```
+driverquery
+```
+
+## 11.  Scans system files for corruption and repairs them if possible.
+```
+sfc /scannow
+```
+
+## 12. The command can shut down a system.
+```
+shutdown /s
+```
+
+## 13. The command can restart a system.
+```
+shutdown /r /t 0
+```
+
+## 14. ## Abort a Scheduled Shutdown
+
+Cancels a scheduled shutdown or restart.
+
+```cmd
+shutdown /a
