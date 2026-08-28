@@ -17,3 +17,22 @@ dir /s
 ```
 rmdir directory_name
 ```
+
+## 5. To display enough text file contents to fill your terminal window
+```
+more file_name
+```
+
+## 6. To see processes running using CMD
+```
+tasklist
+```
+
+## 7. Filter Running Processes
+
+Filters the process list to find a specific process.
+
+```cmd
+tasklist /FI "imagename eq sshd.exe"
+```
+
