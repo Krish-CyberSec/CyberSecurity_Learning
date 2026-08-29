@@ -170,3 +170,7 @@ Get-ComputerInfo
       Get-NetIPAddress
       ```
       
+## 23. This is a PowerShell cmdlet used to read the contents of a file.
+```cmd
+Get-Content <path>
+```
