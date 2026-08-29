@@ -174,3 +174,29 @@ Get-ComputerInfo
 ```cmd
 Get-Content <path>
 ```
+
+## 24. This provides a detailed view of all currently running processes, including CPU and memory usage, making it a powerful tool for monitoring and troubleshooting.
+```cmd
+Get-Process
+```
+
+## 25. This allows the retrieval of information about the status of services on the machine, such as which services are running, stopped, or paused. It is used extensively in troubleshooting by system administrators, but also by forensics analysts hunting for anomalous services installed on the system.
+```cmd
+Get-Service
+```
+
+## 26. This allows the retrieval of information about the status of services on the machine, such as which services are running, stopped, or paused. It is used extensively in troubleshooting by system administrators, but also by forensics analysts hunting for anomalous services installed on the system.
+```cmd
+Get-Service
+```
+
+## 27. This displays current TCP connections, giving insights into both local and remote endpoints. This cmdlet is particularly handy during an incident response or malware analysis task, as it can uncover hidden backdoors or established connections towards an attacker-controlled server.
+```cmd
+Get-NetTCPConnection
+```
+
+## 28. This is a useful cmdlet for generating file hashes, which is particularly valuable in incident response, threat hunting, and malware analysis, as it helps verify file integrity and detect potential tampering.
+```cmd
+Get-FileHash
+```
+
