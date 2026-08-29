@@ -103,5 +103,50 @@ If no path is specified, it displays the current directory's children
    ```
    same command will work for a directory; just write the path
 
-## 19. 
+## 19. Piping
+
+Piping (|) sends the output of one command as input to another. In PowerShell, pipes pass objects along with their properties and methods.
+
+### Examples
+
+Sort files by size:
+```cmd
+Get-ChildItem | Sort-Object Length
+```
+
+Filter .txt files:
+```cmd
+Get-ChildItem | Where-Object -Property "Extension" -eq ".txt"
+```
+### Common Comparison Operators
+Operator	Meaning
+``-eq``	Equal to
+
+``-ne``	Not equal to
+
+``-gt``	Greater than
+
+``-ge``	Greater than or equal to
+
+``-lt``	Less than
+
+``-le``	Less than or equal to
+
+
+Filtered by selecting properties that match  a specified pattern:
+```cmd
+Get-ChildItem | Where-Object -Property "Name" -like "ship*"
+```
+
+This is used to select specific properties from objects or limit the number of objects returned. It’s useful for refining the output to show only the details one needs.
+```cmd
+Get-ChildItem | Select-Object Name,Length
+```
+
+This cmdlet searches for text patterns within files, similar to grep in Unix-based systems or findstr in Windows Command Prompt. It’s commonly used for finding specific content within log files or documents
+```cmd
+Select-String -Path ".\captain-hat.txt" -Pattern "hat"
+```
+
+Key idea: PowerShell piping allows you to filter, sort, and analyze data by chaining commands.
       
