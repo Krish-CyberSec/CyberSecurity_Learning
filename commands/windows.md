@@ -200,3 +200,99 @@ Get-NetTCPConnection
 Get-FileHash
 ```
 
+
+## 29. Invoke-Command
+
+Invoke-Command is a PowerShell cmdlet used to execute commands and scripts on local or remote computers.
+
+It is particularly useful for system administration, security engineering, and penetration testing because it enables remote management and automation across multiple systems.
+
+Syntax
+```cmd
+Invoke-Command -ComputerName <computer> -ScriptBlock { <command> }
+```
+### Examples
+Run a script on a remote computer
+```cmd
+Invoke-Command -FilePath "C:\scripts\test.ps1" -ComputerName "Server01"
+```
+
+The -FilePath parameter specifies a script located on the local computer. PowerShell executes the script on the remote computer and returns the results to the local computer.
+
+Run a command on a remote computer
+```cmd
+Invoke-Command -ComputerName "Server01" -ScriptBlock { Get-Culture }
+```
+
+The -ComputerName parameter specifies the remote computer, while -ScriptBlock specifies the command to execute remotely.
+
+Run commands with specific credentials
+```cmd
+Invoke-Command -ComputerName "Server01" `
+    -Credential "Domain01\User01" `
+    -ScriptBlock { Get-Culture }
+```
+
+The -Credential parameter allows the command to run under the security context of a specified user account.
+
+PowerShell may prompt for the user's password when the command is executed.
+
+ScriptBlock
+
+The -ScriptBlock parameter is one of the most useful features of Invoke-Command.
+
+For example:
+```cmd
+Invoke-Command -ComputerName "Server01" -ScriptBlock {
+    Get-Process
+}
+```
+
+Multiple commands can be placed inside the script block:
+```cmd
+Invoke-Command -ComputerName "Server01" -ScriptBlock {
+    Get-Date
+    Get-Culture
+    Get-Process
+}
+```
+
+These commands execute on the remote computer, and their output is returned to the local PowerShell session.
+
+Execute a Script on Multiple Computers
+
+Invoke-Command can target multiple computers:
+```cmd
+Invoke-Command -ComputerName "Server01", "Server02", "Server03" -ScriptBlock {
+    Get-ComputerInfo
+}
+```
+
+This is useful for performing the same administrative task across multiple systems.
+
+Important Parameters
+Parameter	Description
+-ComputerName	Specifies one or more computers on which to execute the command.
+
+-ScriptBlock	Specifies the commands to execute on the remote computer.
+
+-FilePath	Specifies a local script to execute on the remote computer.
+
+-Credential	Specifies a user account under which the command should run.
+
+-Session	Executes commands using an existing PowerShell session.
+
+Key Concept
+
+The important distinction is where the command executes.
+```cmd
+Invoke-Command -ComputerName "Server01" -ScriptBlock {
+    Get-Process
+}
+```
+
+Here, Get-Process executes on Server01, not on the local machine. The results are then returned to the local PowerShell session.
+
+In short:
+
+Invoke-Command allows you to execute PowerShell commands or scripts on remote computers and retrieve their results locally.
