@@ -65,9 +65,43 @@ shutdown /s
 shutdown /r /t 0
 ```
 
-## 14. ## Abort a Scheduled Shutdown
+## 14. Abort a Scheduled Shutdown
 
 Cancels a scheduled shutdown or restart.
 
 ```cmd
 shutdown /a
+```
+
+## 15. Alternative to dir in PowerShell
+```cmd
+Get-ChildItem -Path "./Documents"
+```
+If no path is specified, it displays the current directory's children
+
+
+## 16. Alternative to cd in PowerShell
+```cmd
+ Set-Location -Path ".\Documents"
+```
+
+## 17. Alternative to mkdir or echo in PowerShell for creating a directory or file 
+   1. For a directory
+   ```cmd
+
+         New-Item -Path ".\captain-cabin\captain-wardrobe" -ItemType "Directory"
+   ```
+  2. For a file
+  ```cmd
+   New-Item -Path ".\captain-cabin\captain-wardrobe\captain-boots.txt" -ItemType "File"
+  ```
+
+## 18. Alternative to rmdir or del in PowerShell for deleting a directory or file 
+
+   ```cmd
+    Remove-Item -Path ".\captain-cabin\captain-wardrobe\captain-boots.txt"
+   ```
+   same command will work for a directory; just write the path
+
+## 19. 
+      
