@@ -150,3 +150,23 @@ Select-String -Path ".\captain-hat.txt" -Pattern "hat"
 
 Key idea: PowerShell piping allows you to filter, sort, and analyze data by chaining commands.
       
+## 20. This cmdlet retrieves comprehensive system information, including operating system information, hardware specifications, BIOS details, and more. It provides a snapshot of the entire system configuration in a single command. Its traditional counterpart **systeminfo** retrieves only a small set of the same details.
+```cmd
+Get-ComputerInfo
+```
+
+## 21. Essential for managing user accounts and understanding the machine’s security configuration, this lists all the local user accounts on the system. The default output displays, for each user, username, account status, and description.
+```cmd
+ Get-LocalUser
+```
+
+## 22. Similar to the traditional **ipconfig** command, the following two cmdlets can be used to retrieve detailed information about the system’s network configuration.
+   1. This provides detailed information about the network interfaces on the system, including IP addresses, DNS servers, and gateway configurations.
+      ```cmd
+      Get-NetIPConfiguration
+      ```
+   2. In case we need specific details about the IP addresses assigned to the network interfaces, this cmdlet will show details for all IP                              addresses configured on the system, including those that are not currently active.
+      ```cmd
+      Get-NetIPAddress
+      ```
+      
