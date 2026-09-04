@@ -156,3 +156,226 @@ Transmission Control Protocol, Src Port: 3372, Dst Port: 80, Seq: 0, Len: 0
 ```
 
 Verbosity provides full packet details and can make investigation difficult when used on many packets. However, it is valuable for in-depth analysis, scripting, carving, and correlation. The most effective approach is to filter the packets first and then use `-V` on the relevant results.
+
+
+## Capture Condition Parameters
+
+Imagine you are using a **security camera** to watch a busy road.
+
+- **TShark** is the camera.
+- **Packets** are the vehicles passing by.
+- **Capture files** are the video recordings.
+- **Autostop (`-a`)** tells the camera when to stop recording.
+- **Ring buffer (`-b`)** tells the camera how to manage multiple recording files.
+
+These options help you control **when TShark stops capturing** and **how it saves the captured packets**.
+
+### 1. Autostop Parameters (`-a`)
+
+Think of autostop as setting a **timer on your camera**. Once the condition is met, the camera stops recording.
+
+| Parameter | Easy Explanation | Example |
+|---|---|---|
+| `-a duration:X` | Record for **X seconds**, then stop. | `tshark -w test.pcap -a duration:1` |
+| `-a filesize:X` | Stop when the capture file reaches **X KB**. | `tshark -w test.pcap -a filesize:10` |
+| `-a files:X` | Stop after creating **X capture files**. | `tshark -w test.pcap -a filesize:10 -a files:3` |
+
+#### Example: Stop After 1 Second
+
+```bash
+tshark -w test.pcap -a duration:1
+```
+
+**Analogy:** Start your camera, record for 1 second, and then turn it off.
+
+**Result:** TShark captures packets for 1 second and saves them to `test.pcap`.
+
+#### Example: Stop When the File Reaches 10 KB
+
+```bash
+tshark -w test.pcap -a filesize:10
+```
+
+**Analogy:** Your camera has a memory card that can hold only 10 KB of video. Once it reaches that limit, recording stops.
+
+**Result:** TShark stops when the capture file reaches approximately 10 KB.
+
+#### Example: Stop After 3 Files
+
+```bash
+tshark -w test.pcap -a filesize:10 -a files:3
+```
+
+**Analogy:** You tell your camera:
+
+> "Create files of 10 KB each, and stop after making 3 files."
+
+**Result:** TShark stops after creating the specified number of files.
+
+### 2. Ring Buffer Parameters (`-b`)
+
+Now imagine a **security camera with a storage system that keeps only the latest recordings**.
+
+When the storage is full, the camera creates a new file and eventually overwrites the oldest one.
+
+This is called a **ring buffer**.
+
+| Parameter | Easy Explanation | Example |
+|---|---|---|
+| `-b duration:X` | Create a new file after **X seconds**. | `tshark -w test.pcap -b duration:1` |
+| `-b filesize:X` | Create a new file after reaching **X KB**. | `tshark -w test.pcap -b filesize:10` |
+| `-b files:X` | Keep **X files** and overwrite the oldest when necessary. | `tshark -w test.pcap -b filesize:10 -b files:3` |
+
+#### Example: Create a New File Every Second
+
+```bash
+tshark -w test.pcap -b duration:1
+```
+
+**Analogy:** Your camera creates a new video file every second.
+
+```text
+File 1 → File 2 → File 3 → File 4 → ...
+```
+
+**Result:** TShark keeps creating new capture files.
+
+#### Example: Create a New File Every 10 KB
+
+```bash
+tshark -w test.pcap -b filesize:10
+```
+
+**Analogy:** Every time a recording reaches 10 KB, the camera starts a new file.
+
+```text
+File 1 (10 KB) → File 2 (10 KB) → File 3 (10 KB) → ...
+```
+
+**Result:** TShark creates a new file whenever the previous file reaches the specified size.
+
+#### Example: Keep Only 3 Files
+
+```bash
+tshark -w test.pcap -b filesize:10 -b files:3
+```
+
+**Analogy:** Your camera has room for only 3 video files.
+
+```text
+File 1 → File 2 → File 3
+```
+
+When a new file is created:
+
+```text
+File 2 → File 3 → File 4
+```
+
+The oldest file is overwritten.
+
+**Result:** TShark keeps a maximum of 3 files and continuously replaces the oldest file.
+
+### 3. Autostop vs Ring Buffer
+
+The easiest way to remember the difference is:
+
+| Option | Analogy | What It Does |
+|---|---|---|
+| `-a` | **Stopwatch** | Stops the capture when a condition is met. |
+| `-b` | **Circular storage** | Creates new files and can overwrite the oldest file. |
+
+### 4. Combining `-a` and `-b`
+
+You can combine both options.
+
+Think of it like telling your camera:
+
+> "Keep recording in separate files, but stop the entire recording after a certain time."
+
+#### Example
+
+```bash
+tshark -w test.pcap -a duration:10 -b filesize:5
+```
+
+**Meaning:**
+
+- Create a new file whenever the current file reaches **5 KB**.
+- Stop the entire capture after **10 seconds**.
+
+**Analogy:** Record continuously, split the recording into 5 KB files, and turn the camera off after 10 seconds.
+
+### 5. Important Note
+
+Capture condition parameters work only in **live capturing/sniffing mode**.
+
+They do **not** work when reading an existing capture file with `-r`.
+
+#### Incorrect Example
+
+```bash
+tshark -r demo.pcapng -a duration:10
+```
+
+**Why?**
+
+You are reading an existing recording, not creating a new one.
+
+**Analogy:** You cannot tell a camera to "stop recording" when you are only watching an old video.
+
+If you want to extract specific packets from an existing capture file, use the **read (`-r`) and write (`-w`)** options.
+
+### 6. Sample Autostop Query
+
+Start sniffing traffic, stop after **2 seconds**, and save the capture into **5 files**, each with a maximum size of **5 KB**.
+
+```shell-session
+user@ubuntu$ tshark -w autostop-demo.pcap -a duration:2 -a filesize:5 -a files:5
+Capturing on 'ens5'
+13
+```
+
+**Analogy:** Tell your camera:
+
+> "Record for 2 seconds. Split the recording into 5 KB files. Stop after creating 5 files."
+
+### 7. List the Capture Files
+
+```shell-session
+# List the contents of the current folder.
+user@ubuntu$ ls
+autostop-demo_..1_2022.pcap
+autostop-demo_..2_2022.pcap
+autostop-demo_..3_2022.pcap
+autostop-demo_..4_2022.pcap
+autostop-demo_..5_2022.pcap
+```
+
+### Quick Memory Trick
+
+> **`-a` = Stop**
+>
+> **`-b` = Keep creating files**
+>
+> **`-a duration:10` = Stop after 10 seconds**
+>
+> **`-a filesize:10` = Stop after 10 KB**
+>
+> **`-b filesize:10` = Create a new file after 10 KB**
+>
+> **`-b files:3` = Keep 3 files and overwrite the oldest**
+
+### Summary
+
+| Option | Simple Meaning |
+|---|---|
+| `-a` | Stop the capture when a condition is met. |
+| `-b` | Create multiple files and manage them like a circular storage system. |
+| `-a duration:X` | Stop after X seconds. |
+| `-a filesize:X` | Stop after reaching X KB. |
+| `-a files:X` | Stop after creating X files. |
+| `-b duration:X` | Create a new file after X seconds. |
+| `-b filesize:X` | Create a new file after reaching X KB. |
+| `-b files:X` | Overwrite the oldest file after X files. |
+
