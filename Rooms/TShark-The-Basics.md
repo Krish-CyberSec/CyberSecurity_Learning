@@ -1,0 +1,33 @@
+# TShark 
+
+## Command-Line Packet Analysis Hints
+
+TShark is a text-based tool that is suitable for data carving, in-depth packet analysis, and automation with scripts. Its strength and flexibility come from the nature of CLI tools, as the produced and processed data can be pipelined to additional tools.
+
+### Common Tools and Utilities
+
+| Tool/Utility | Purpose and Benefit |
+|---|---|
+| `capinfos` | A program that provides details of a specified capture file. It is suggested to view the summary of the capture file before starting an investigation. |
+| `grep` | Helps search plain-text data. |
+| `cut` | Helps cut parts of lines from a specified data source. |
+| `uniq` | Filters repeated lines or values. |
+| `nl` | Views the number of shown lines. |
+| `sed` | A stream editor used to filter and transform text. |
+| `awk` | A scripting language that helps with pattern searching and processing. |
+
+### Basic Workflow
+
+1. Use `capinfos` to inspect the capture file.
+2. Use `tshark` to extract and analyze packet data.
+3. Use `grep` to search for specific patterns or values.
+4. Use `cut` to extract specific fields.
+5. Use `uniq` to remove duplicate values.
+6. Use `nl` to display line numbers.
+7. Use `sed` to manipulate or filter text.
+8. Use `awk` for advanced pattern matching and data processing.
+
+## Example
+
+```bash
+tshark -r capture.pcap -T fields -e ip.src | sort | uniq
