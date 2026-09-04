@@ -379,3 +379,154 @@ autostop-demo_..5_2022.pcap
 | `-b filesize:X` | Create a new file after reaching X KB. |
 | `-b files:X` | Overwrite the oldest file after X files. |
 
+# Packet Filtering Parameters
+
+## Capture Filters vs Display Filters
+
+TShark provides two different ways to filter packets:
+
+1. **Capture filters** — decide which packets are captured and saved.
+2. **Display filters** — decide which captured packets are shown for analysis.
+
+### Simple Analogy
+
+Imagine a security camera recording vehicles:
+
+- A **capture filter** tells the camera which vehicles to record.
+- A **display filter** records everything but shows only selected vehicles when you review the footage.
+
+---
+
+## Filter Timing
+
+| Filter Type | When It Is Applied | What It Does |
+|-------------|--------------------|--------------|
+| **Capture Filter** | Before a packet is saved | Prevents unwanted packets from being captured |
+| **Display Filter** | After a packet has been captured | Hides packets that do not match the filter |
+
+Capture filters reduce the amount of data written to the capture file.
+
+Display filters do not remove packets from the capture file. They only control which packets are displayed.
+
+> **Important:** A display filter can also be used while TShark is processing a live capture, but it is applied after packets have been captured.
+
+---
+
+## Capture Filters
+
+Capture filters are applied during live packet capture.
+
+They use **Berkeley Packet Filter (BPF)** syntax, which is also used by Wireshark capture filters.
+
+The capture filter parameter is:
+
+```bash
+-f
+```
+
+### Example
+
+```bash
+tshark -i 1 -f "port 80"
+```
+
+This captures only traffic using port `80`.
+
+Packets that do not match the filter are not saved.
+
+### Analogy
+
+This is like telling a security camera:
+
+> “Record only vehicles entering through gate 80.”
+
+---
+
+## Display Filters
+
+Display filters use Wireshark display-filter syntax.
+
+The display filter parameter is:
+
+```bash
+-Y
+```
+
+Display filters are useful when investigating a capture file because they allow you to focus on specific packets without modifying the original capture.
+
+### Example
+
+```bash
+tshark -r capture.pcap -Y "http"
+```
+
+This reads `capture.pcap` and displays only HTTP packets.
+
+### Analogy
+
+This is like saying:
+
+> “Show me only the HTTP-related vehicles from the recording.”
+
+---
+
+## Side-by-Side Examples
+
+### Filter Traffic by Port
+
+| Capture Filter | Display Filter |
+|----------------|----------------|
+| ```bash<br>tshark -i 1 -f "port 80"<br>``` | ```bash<br>tshark -r capture.pcap -Y "tcp.port == 80"<br>``` |
+| Captures only traffic using port `80`. | Displays packets using port `80` from an existing capture. |
+| Unmatched packets are not saved. | Unmatched packets remain in the capture file but are hidden. |
+
+### Filter Traffic by IP Address
+
+| Capture Filter | Display Filter |
+|----------------|----------------|
+| ```bash<br>tshark -i 1 -f "host 192.168.1.10"<br>``` | ```bash<br>tshark -r capture.pcap -Y "ip.addr == 192.168.1.10"<br>``` |
+| Captures traffic involving `192.168.1.10`. | Displays packets involving `192.168.1.10`. |
+| Uses BPF syntax. | Uses Wireshark display-filter syntax. |
+
+### Filter HTTP Traffic
+
+| Capture Filter | Display Filter |
+|----------------|----------------|
+| ```bash<br>tshark -i 1 -f "tcp port 80"<br>``` | ```bash<br>tshark -r capture.pcap -Y "http"<br>``` |
+| Captures TCP traffic on port `80`. | Displays packets identified as HTTP. |
+| The filter is applied while capturing. | The filter is applied while reading or displaying packets. |
+
+### Filter DNS Traffic
+
+| Capture Filter | Display Filter |
+|----------------|----------------|
+| ```bash<br>tshark -i 1 -f "port 53"<br>``` | ```bash<br>tshark -r capture.pcap -Y "dns"<br>``` |
+| Captures traffic using port `53`. | Displays packets recognized as DNS traffic. |
+
+---
+
+## Main Differences
+
+| Feature | Capture Filter (`-f`) | Display Filter (`-Y`) |
+|---------|------------------------|------------------------|
+| Syntax | BPF syntax | Wireshark display-filter syntax |
+| Applied before saving | Yes | No |
+| Applied after capture | No | Yes |
+| Reduces capture file size | Yes | No |
+| Hides packets from output | No | Yes |
+| Changes the original capture | The original traffic is never saved | No |
+| Best use | Limiting live traffic | Detailed packet investigation |
+
+---
+
+## Quick Memory Trick
+
+- `-f` means **filter before saving**.
+- `-Y` means **filter what you display**.
+
+Think of it this way:
+
+> **Capture filter = security guard**  
+> **Display filter = video search tool**
+
+Both help you find useful traffic, but they work at different stages.
