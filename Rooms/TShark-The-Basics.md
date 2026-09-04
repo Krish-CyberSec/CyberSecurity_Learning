@@ -530,3 +530,478 @@ Think of it this way:
 > **Display filter = video search tool**
 
 Both help you find useful traffic, but they work at different stages.
+
+
+# Capture Filters
+
+Capture filters are used to select packets **before they are saved**.
+
+TShark uses the same capture-filter syntax as Wireshark. This syntax is based on **Berkeley Packet Filters (BPF)**.
+
+Capture filters help reduce:
+
+- The amount of captured traffic
+- The capture file size
+- The time needed to investigate packets
+
+## Simple Analogy
+
+Imagine a security camera recording vehicles on a road.
+
+A capture filter is like telling the camera:
+
+> “Record only vehicles coming from this address or using this port.”
+
+Unwanted vehicles are ignored and are not saved in the recording.
+
+---
+
+## Capture Filter Syntax
+
+The basic capture-filter structure is:
+
+```text
+[protocol] [direction] [type] [value]
+```
+
+For example:
+
+```bash
+tshark -f "tcp dst port 80"
+```
+
+This means:
+
+- `tcp` — use TCP traffic
+- `dst` — match the destination
+- `port` — filter by port
+- `80` — destination port 80
+
+Capture filters can also use Boolean operators such as:
+
+- `and`
+- `or`
+- `not`
+
+Example:
+
+```bash
+tshark -f "tcp port 80 or tcp port 443"
+```
+
+This captures TCP traffic using either port `80` or port `443`.
+
+---
+
+## Capture Filter Qualifiers
+
+Capture filters are commonly built using three parts:
+
+| Qualifier | Purpose | Common Options |
+|-----------|---------|----------------|
+| **Type** | Defines what should be matched | `host`, `net`, `port`, `portrange` |
+| **Direction** | Defines the traffic direction | `src`, `dst` |
+| **Protocol** | Defines the network protocol | `tcp`, `udp`, `icmp`, `ip`, `ip6`, `arp`, `ether` |
+
+If no direction is specified, the filter normally matches traffic in **either direction**.
+
+---
+
+## 1. Type Qualifier
+
+The type qualifier defines what you want to filter.
+
+### Available Types
+
+| Type | Purpose |
+|------|---------|
+| `host` | Match an IP address or hostname |
+| `net` | Match a network range |
+| `port` | Match a single port |
+| `portrange` | Match a range of ports |
+
+### Filtering a Host
+
+```bash
+tshark -f "host 10.10.10.10"
+```
+
+This captures traffic to or from `10.10.10.10`.
+
+### Filtering a Network
+
+```bash
+tshark -f "net 10.10.10.0/24"
+```
+
+This captures traffic involving the network `10.10.10.0/24`.
+
+### Filtering a Port
+
+```bash
+tshark -f "port 80"
+```
+
+This captures traffic using port `80`.
+
+### Filtering a Port Range
+
+```bash
+tshark -f "portrange 80-100"
+```
+
+This captures traffic using ports from `80` through `100`.
+
+### Analogy
+
+The type qualifier is like choosing what the security camera should look for:
+
+- `host` — a specific vehicle
+- `net` — vehicles from a particular area
+- `port` — a specific entrance
+- `portrange` — several entrances
+
+---
+
+## 2. Direction Qualifier
+
+The direction qualifier defines whether the traffic is coming from or going to a target.
+
+### Available Directions
+
+| Direction | Meaning |
+|-----------|---------|
+| `src` | Source of the traffic |
+| `dst` | Destination of the traffic |
+
+### Filtering a Source Host
+
+```bash
+tshark -f "src host 10.10.10.10"
+```
+
+This captures packets sent **from** `10.10.10.10`.
+
+### Filtering a Destination Host
+
+```bash
+tshark -f "dst host 10.10.10.10"
+```
+
+This captures packets sent **to** `10.10.10.10`.
+
+### Filtering a Source Port
+
+```bash
+tshark -f "src port 4444"
+```
+
+This captures packets sent from source port `4444`.
+
+### Filtering a Destination Port
+
+```bash
+tshark -f "dst port 80"
+```
+
+This captures packets sent to destination port `80`.
+
+### Analogy
+
+The direction qualifier is like checking traffic flow:
+
+- `src` — where the vehicle came from
+- `dst` — where the vehicle is going
+
+If no direction is specified, TShark checks both directions.
+
+---
+
+## 3. Protocol Qualifier
+
+The protocol qualifier defines the type of network traffic to capture.
+
+### Common Protocols
+
+| Protocol | Purpose |
+|----------|---------|
+| `tcp` | TCP traffic |
+| `udp` | UDP traffic |
+| `icmp` | ICMP traffic, such as ping |
+| `ip` | IPv4 traffic |
+| `ip6` | IPv6 traffic |
+| `arp` | ARP traffic |
+| `ether` | Ethernet traffic |
+
+### Filtering TCP Traffic
+
+```bash
+tshark -f "tcp"
+```
+
+### Filtering UDP Traffic
+
+```bash
+tshark -f "udp"
+```
+
+### Filtering ICMP Traffic
+
+```bash
+tshark -f "icmp"
+```
+
+### Filtering IPv6 Traffic
+
+```bash
+tshark -f "ip6"
+```
+
+### Filtering a MAC Address
+
+```bash
+tshark -f "ether host F8:DB:C5:A2:5D:81"
+```
+
+This captures Ethernet traffic to or from the specified MAC address.
+
+### Filtering by IP Protocol Number
+
+You can also filter protocols using their assigned IP protocol numbers.
+
+For example, ICMP uses protocol number `1`:
+
+```bash
+tshark -f "ip proto 1"
+```
+
+### Analogy
+
+The protocol qualifier is like telling the camera what kind of vehicle to record:
+
+- `tcp` — trucks
+- `udp` — motorcycles
+- `icmp` — emergency vehicles
+- `ip6` — vehicles using a different road system
+
+---
+
+## Combining Qualifiers
+
+Qualifiers can be combined to create more specific filters.
+
+### TCP Traffic to Port 80
+
+```bash
+tshark -f "tcp dst port 80"
+```
+
+### UDP Traffic from Port 53
+
+```bash
+tshark -f "udp src port 53"
+```
+
+### Traffic from a Specific Host to Port 443
+
+```bash
+tshark -f "host 10.10.10.10 and port 443"
+```
+
+### Traffic from a Specific Network
+
+```bash
+tshark -f "net 10.10.10.0/24 and tcp"
+```
+
+---
+
+## Boolean Operators
+
+Boolean operators allow you to combine multiple conditions.
+
+| Operator | Meaning | Example |
+|----------|---------|---------|
+| `and` | Both conditions must match | `tcp and port 80` |
+| `or` | Either condition can match | `port 80 or port 443` |
+| `not` | Excludes matching traffic | `not tcp` |
+
+### Using `and`
+
+```bash
+tshark -f "tcp and port 80"
+```
+
+Captures TCP traffic using port `80`.
+
+### Using `or`
+
+```bash
+tshark -f "port 80 or port 443"
+```
+
+Captures traffic using port `80` or port `443`.
+
+### Using `not`
+
+```bash
+tshark -f "not arp"
+```
+
+Captures all traffic except ARP packets.
+
+### Using Parentheses
+
+```bash
+tshark -f "tcp and (port 80 or port 443)"
+```
+
+Captures TCP traffic using port `80` or `443`.
+
+---
+
+## Testing Capture Filters
+
+To practice capture filters, you can use two terminal windows.
+
+- **Terminal 1:** Run TShark to capture traffic.
+- **Terminal 2:** Generate traffic using tools such as `curl` or `nc`.
+- Return to **Terminal 1** to view the captured packets.
+
+A terminal multiplexer such as `terminator` can be used to display both terminals in one window.
+
+---
+
+## Example: Filtering Traffic from a Host
+
+### Terminal 1 — Start TShark
+
+```bash
+tshark -f "host 10.10.10.10"
+```
+
+Example output:
+
+```text
+Capturing on 'ens5'
+1  0.000000000  YOUR-IP → 10.10.10.10  TCP 74 36150 → 80 [SYN]
+2  0.003452830  10.10.10.10 → YOUR-IP  TCP 74 80 → 36150 [SYN, ACK]
+3  0.003487830  YOUR-IP → 10.10.10.10  TCP 66 36150 → 80 [ACK]
+4  0.003610800  YOUR-IP → 10.10.10.10  HTTP 141 GET / HTTP/1.1
+```
+
+### Terminal 2 — Generate Traffic
+
+```bash
+curl -v http://10.10.10.10
+```
+
+TShark displays only packets involving `10.10.10.10`.
+
+---
+
+## Practice Examples
+
+### Host Filtering
+
+Capture traffic to or from a specific host.
+
+Generate traffic:
+
+```bash
+curl http://tryhackme.com
+```
+
+Capture traffic:
+
+```bash
+tshark -f "host tryhackme.com"
+```
+
+---
+
+### IP Filtering
+
+Capture traffic to or from a specific IP address.
+
+Generate traffic:
+
+```bash
+nc 10.10.10.10 4444 -vw 5
+```
+
+Capture traffic:
+
+```bash
+tshark -f "host 10.10.10.10"
+```
+
+---
+
+### Port Filtering
+
+Capture traffic using a specific port.
+
+Generate traffic:
+
+```bash
+nc 10.10.10.10 4444 -vw 5
+```
+
+Capture traffic:
+
+```bash
+tshark -f "port 4444"
+```
+
+---
+
+### Protocol Filtering
+
+Capture traffic using a specific protocol.
+
+Generate UDP traffic:
+
+```bash
+nc -u 10.10.10.10 4444 -vw 5
+```
+
+Capture UDP traffic:
+
+```bash
+tshark -f "udp"
+```
+
+---
+
+## Quick Reference
+
+| Goal | Capture Filter |
+|------|----------------|
+| Capture traffic from or to a host | `tshark -f "host 10.10.10.10"` |
+| Capture traffic from a source host | `tshark -f "src host 10.10.10.10"` |
+| Capture traffic to a destination host | `tshark -f "dst host 10.10.10.10"` |
+| Capture a network range | `tshark -f "net 10.10.10.0/24"` |
+| Capture traffic on port 80 | `tshark -f "port 80"` |
+| Capture traffic on ports 80–100 | `tshark -f "portrange 80-100"` |
+| Capture TCP traffic | `tshark -f "tcp"` |
+| Capture UDP traffic | `tshark -f "udp"` |
+| Capture ICMP traffic | `tshark -f "icmp"` |
+| Capture traffic except ARP | `tshark -f "not arp"` |
+
+## Important Note
+
+Capture filters use **BPF syntax** and are applied while capturing traffic.
+
+Display filters use **Wireshark display-filter syntax** and are applied after packets have been captured.
+
+```bash
+# Capture filter
+tshark -i 1 -f "tcp port 80"
+
+# Display filter
+tshark -r capture.pcap -Y "tcp.port == 80"
+```
+
+> **Capture filter:** Decide what gets recorded.  
+> **Display filter:** Decide what gets shown.
