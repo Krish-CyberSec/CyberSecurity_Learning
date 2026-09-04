@@ -1005,3 +1005,393 @@ tshark -r capture.pcap -Y "tcp.port == 80"
 
 > **Capture filter:** Decide what gets recorded.  
 > **Display filter:** Decide what gets shown.
+
+
+# Display Filters
+
+Display filters are used to **show only selected packets after they have been captured**.
+
+TShark uses Wireshark's display-filter syntax with the `-Y` parameter.
+
+```bash
+tshark -r capture.pcap -Y 'filter'
+```
+
+## Simple Analogy
+
+Imagine a security camera that records every vehicle on a road.
+
+A display filter is like searching the recording and saying:
+
+> “Show me only the red cars.”
+
+The other vehicles are still in the recording. They are only hidden from the current view.
+
+---
+
+## Capture Filters vs Display Filters
+
+| Feature | Capture Filter | Display Filter |
+|---------|----------------|----------------|
+| Parameter | `-f` | `-Y` |
+| Syntax | BPF syntax | Wireshark display-filter syntax |
+| Applied | During capture | After capture |
+| Reduces saved file size | Yes | No |
+| Deletes or removes packets | Packets are never saved | No |
+| Can be changed during investigation | No | Yes |
+
+### Side-by-Side Example
+
+```bash
+# Capture filter: only capture traffic on port 80
+tshark -i 1 -f 'tcp port 80'
+
+# Display filter: show port 80 traffic from an existing capture
+tshark -r capture.pcap -Y 'tcp.port == 80'
+```
+
+---
+
+## Display Filter Syntax
+
+The basic display-filter structure is:
+
+```text
+field operator value
+```
+
+Example:
+
+```bash
+tshark -Y 'ip.addr == 10.10.10.10'
+```
+
+Here:
+
+- `ip.addr` is the packet field
+- `==` means “equals”
+- `10.10.10.10` is the value being searched for
+
+### Shell Quoting
+
+Using single quotes around display filters is recommended:
+
+```bash
+tshark -Y 'ip.addr == 10.10.10.10'
+```
+
+Single quotes help prevent spaces and special characters from being interpreted by the shell.
+
+---
+
+## Display Filter Operators
+
+| Operator | Meaning | Example |
+|----------|---------|---------|
+| `==` | Equals | `ip.addr == 10.10.10.10` |
+| `!=` | Does not equal | `tcp.port != 80` |
+| `>` | Greater than | `tcp.len > 100` |
+| `<` | Less than | `tcp.len < 100` |
+| `>=` | Greater than or equal to | `tcp.len >= 100` |
+| `<=` | Less than or equal to | `tcp.len <= 100` |
+| `contains` | Contains text or data | `http.request.uri contains 'login'` |
+| `matches` | Matches a regular expression | `http.host matches 'example'` |
+
+---
+
+## Boolean Operators
+
+Boolean operators allow you to combine multiple conditions.
+
+| Operator | Meaning | Example |
+|----------|---------|---------|
+| `and` | Both conditions must match | `tcp and tcp.port == 80` |
+| `or` | Either condition can match | `tcp.port == 80 or tcp.port == 443` |
+| `not` | Excludes matching packets | `not arp` |
+
+### Example
+
+```bash
+tshark -r capture.pcap -Y 'tcp.port == 80 or tcp.port == 443'
+```
+
+This displays TCP traffic using port `80` or port `443`.
+
+### Using Parentheses
+
+```bash
+tshark -r capture.pcap -Y 'ip.addr == 10.10.10.10 and (tcp.port == 80 or tcp.port == 443)'
+```
+
+This displays traffic involving `10.10.10.10` that uses port `80` or `443`.
+
+---
+
+# Common Display Filters
+
+## Protocol: IP
+
+### Filter an IP Address
+
+```bash
+tshark -r capture.pcap -Y 'ip.addr == 10.10.10.10'
+```
+
+Displays packets sent to or received from `10.10.10.10`.
+
+### Filter an IP Network
+
+```bash
+tshark -r capture.pcap -Y 'ip.addr == 10.10.10.0/24'
+```
+
+Displays packets involving the specified IPv4 network.
+
+### Filter a Source IP
+
+```bash
+tshark -r capture.pcap -Y 'ip.src == 10.10.10.10'
+```
+
+Displays packets sent from `10.10.10.10`.
+
+### Filter a Destination IP
+
+```bash
+tshark -r capture.pcap -Y 'ip.dst == 10.10.10.10'
+```
+
+Displays packets sent to `10.10.10.10`.
+
+### Side-by-Side IP Examples
+
+| Goal | Capture Filter | Display Filter |
+|------|----------------|-----------------|
+| Any traffic involving an IP | `-f 'host 10.10.10.10'` | `-Y 'ip.addr == 10.10.10.10'` |
+| Traffic from an IP | `-f 'src host 10.10.10.10'` | `-Y 'ip.src == 10.10.10.10'` |
+| Traffic to an IP | `-f 'dst host 10.10.10.10'` | `-Y 'ip.dst == 10.10.10.10'` |
+
+---
+
+## Protocol: TCP
+
+### Filter TCP Traffic
+
+```bash
+tshark -r capture.pcap -Y 'tcp'
+```
+
+Displays TCP packets.
+
+### Filter a TCP Port
+
+```bash
+tshark -r capture.pcap -Y 'tcp.port == 80'
+```
+
+Displays TCP packets using port `80`.
+
+### Filter a Source TCP Port
+
+```bash
+tshark -r capture.pcap -Y 'tcp.srcport == 80'
+```
+
+Displays packets sent from TCP source port `80`.
+
+### Filter a Destination TCP Port
+
+```bash
+tshark -r capture.pcap -Y 'tcp.dstport == 80'
+```
+
+Displays packets sent to TCP destination port `80`.
+
+### Side-by-Side TCP Examples
+
+| Goal | Capture Filter | Display Filter |
+|------|----------------|-----------------|
+| Any TCP traffic | `-f 'tcp'` | `-Y 'tcp'` |
+| TCP port 80 | `-f 'tcp port 80'` | `-Y 'tcp.port == 80'` |
+| TCP source port 80 | `-f 'tcp src port 80'` | `-Y 'tcp.srcport == 80'` |
+| TCP destination port 80 | `-f 'tcp dst port 80'` | `-Y 'tcp.dstport == 80'` |
+
+---
+
+## Protocol: HTTP
+
+### Filter HTTP Packets
+
+```bash
+tshark -r capture.pcap -Y 'http'
+```
+
+Displays HTTP packets.
+
+### Filter HTTP Response Code 200
+
+```bash
+tshark -r capture.pcap -Y 'http.response.code == 200'
+```
+
+Displays HTTP responses with status code `200`.
+
+### Filter HTTP GET Requests
+
+```bash
+tshark -r capture.pcap -Y 'http.request.method == "GET"'
+```
+
+Displays HTTP GET requests.
+
+### Filter a Specific HTTP Host
+
+```bash
+tshark -r capture.pcap -Y 'http.host == "example.com"'
+```
+
+Displays HTTP traffic for `example.com`.
+
+---
+
+## Protocol: DNS
+
+### Filter DNS Packets
+
+```bash
+tshark -r capture.pcap -Y 'dns'
+```
+
+Displays DNS packets.
+
+### Filter DNS A Queries
+
+```bash
+tshark -r capture.pcap -Y 'dns.qry.type == 1'
+```
+
+Displays DNS queries for IPv4 address records, also called `A` records.
+
+### Filter DNS Queries for a Domain
+
+```bash
+tshark -r capture.pcap -Y 'dns.qry.name == "example.com"'
+```
+
+Displays DNS queries for `example.com`.
+
+---
+
+# Testing Display Filters
+
+The following examples use a capture file named `demo.pcapng`.
+
+## Filter by IP Address
+
+```bash
+tshark -r demo.pcapng -Y 'ip.addr == 145.253.2.203'
+```
+
+Example output:
+
+```text
+13  2.55  145.254.160.237 → 145.253.2.203  DNS  Standard query
+17  2.91  145.253.2.203 → 145.254.160.237  DNS  Standard query response
+```
+
+The filter matched two packets.
+
+However, the packet numbers are `13` and `17`, not `1` and `2`.
+
+This happens because TShark displays the **original packet numbers from the capture file**.
+
+It does not renumber packets after filtering.
+
+---
+
+## Filter by HTTP
+
+```bash
+tshark -r demo.pcapng -Y 'http'
+```
+
+Example output:
+
+```text
+4   0.911  145.254.160.237 → 65.208.228.223  HTTP  GET /download.html
+18  2.984  145.254.160.237 → 216.239.59.99   HTTP  GET /pagead/ads
+27  3.955  216.239.59.99 → 145.254.160.237   HTTP  HTTP/1.1 200 OK
+38  4.846  65.208.228.223 → 145.254.160.237  HTTP  HTTP/1.1 200 OK
+```
+
+The matching packets have original packet numbers `4`, `18`, `27`, and `38`.
+
+Therefore, the output contains four matching packets, even though the packet numbers are not sequential.
+
+---
+
+# Counting Filtered Packets
+
+You can use the `nl` command to add a new sequential number to each line of output.
+
+```bash
+tshark -r demo.pcapng -Y 'http' | nl
+```
+
+Example output:
+
+```text
+     1  4   0.911  145.254.160.237 → 65.208.228.223  HTTP  GET /download.html
+     2  18  2.984  145.254.160.237 → 216.239.59.99   HTTP  GET /pagead/ads
+     3  27  3.955  216.239.59.99 → 145.254.160.237   HTTP  HTTP/1.1 200 OK
+     4  38  4.846  65.208.228.223 → 145.254.160.237  HTTP  HTTP/1.1 200 OK
+```
+
+The first column added by `nl` is the number of matching output lines.
+
+In this example:
+
+- Original packet numbers: `4`, `18`, `27`, `38`
+- Number of filtered packets: `4`
+
+### Analogy
+
+Think of the original packet number as the vehicle's position in the complete recording.
+
+The number added by `nl` is the vehicle's position in your filtered search results.
+
+---
+
+# Useful Display Filter Examples
+
+| Goal | Display Filter |
+|------|----------------|
+| Show IP traffic | `tshark -r capture.pcap -Y 'ip'` |
+| Show IPv6 traffic | `tshark -r capture.pcap -Y 'ipv6'` |
+| Show TCP traffic | `tshark -r capture.pcap -Y 'tcp'` |
+| Show UDP traffic | `tshark -r capture.pcap -Y 'udp'` |
+| Show ICMP traffic | `tshark -r capture.pcap -Y 'icmp'` |
+| Show HTTP traffic | `tshark -r capture.pcap -Y 'http'` |
+| Show DNS traffic | `tshark -r capture.pcap -Y 'dns'` |
+| Show traffic from an IP | `tshark -r capture.pcap -Y 'ip.src == 10.10.10.10'` |
+| Show traffic to an IP | `tshark -r capture.pcap -Y 'ip.dst == 10.10.10.10'` |
+| Show traffic involving an IP | `tshark -r capture.pcap -Y 'ip.addr == 10.10.10.10'` |
+| Show TCP port 80 | `tshark -r capture.pcap -Y 'tcp.port == 80'` |
+| Show HTTP status 200 | `tshark -r capture.pcap -Y 'http.response.code == 200'` |
+| Show DNS A queries | `tshark -r capture.pcap -Y 'dns.qry.type == 1'` |
+
+---
+
+## Important Notes
+
+- Capture filters use **BPF syntax** and use the `-f` parameter.
+- Display filters use **Wireshark display-filter syntax** and use the `-Y` parameter.
+- Display filters do not modify the original capture file.
+- TShark keeps the original packet numbers when displaying filtered packets.
+- Use `nl` when you need a simple count of the displayed results.
+- Use single quotes around filters to avoid shell expansion and spacing problems.
+
+## Quick Memory Trick
+
+> **Capture filter:** Decide what gets recorded.  
+> **Display filter:** Decide what gets shown.
