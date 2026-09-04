@@ -31,3 +31,32 @@ TShark is a text-based tool that is suitable for data carving, in-depth packet a
 
 ```bash
 tshark -r capture.pcap -T fields -e ip.src | sort | uniq
+```
+
+## Command-Line Interface and Parameters
+
+TShark is a text-based (command-line) tool. Therefore, conducting an in-depth and consecutive analysis of the obtained results is easy.
+
+Multiple built-in options are available to help analysts conduct such investigations. However, learning the parameters is essential. You will need the built-in options and associated parameters to control the output and avoid being flooded with detailed TShark output.
+
+> **Note:** TShark requires superuser privileges to sniff live traffic and list all available interfaces.
+
+### Common Parameters
+
+| Parameter | Purpose | Example |
+|---|---|---|
+| `-h` | Display the help page with the most common features. | `tshark -h` |
+| `-v` | Show version information. | `tshark -v` |
+| `-D` | List available sniffing interfaces. | `tshark -D` |
+| `-i` | Choose an interface to capture live traffic. | `tshark -i 1` |
+| `-i` | Choose an interface by its name. | `tshark -i ens55` |
+| No parameter | Sniff traffic similar to `tcpdump`. | `tshark` |
+
+### Examples
+
+#### Display Help
+
+```bash
+tshark -h
+```
+
