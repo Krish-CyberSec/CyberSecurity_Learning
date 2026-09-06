@@ -1161,3 +1161,641 @@ Run against authorized hash/archive data
 ```
 
 That workflow will make John's rule system much easier to understand than trying to memorize every modifier at once.
+
+
+# 15. Cracking SSH Private Key Passwords
+
+John can also be used in CTFs and authorized security assessments to test the password protecting an **SSH private key**.
+
+This is slightly different from cracking a normal password hash, but the overall idea is familiar:
+
+```text
+SSH private key
+      ↓
+   ssh2john
+      ↓
+John-readable password-verification data
+      ↓
+     John
+      ↓
+Candidate password testing
+```
+
+> **Important:** Only use this against SSH keys you own or have explicit permission to test.
+
+---
+
+## 15.1 What is an SSH Private Key?
+
+SSH (Secure Shell) is commonly used to connect securely to remote computers.
+
+There are two common ways to authenticate:
+
+### Password authentication
+
+You connect to a server and provide something like:
+
+```text
+Username: alice
+Password: MyPassword123!
+```
+
+The server checks the password before allowing access.
+
+---
+
+### SSH key-based authentication
+
+Instead of typing an account password every time, SSH can use a **key pair**.
+
+The pair consists of:
+
+```text
+Private key  → id_rsa
+Public key   → id_rsa.pub
+```
+
+The **public key** can be placed on the server.
+
+The **private key** should remain secret and stay with the person who owns it.
+
+---
+
+## 15.2 An Easy Analogy: Lock and Key
+
+Think of SSH key authentication like a special lock.
+
+```text
+Server
+  ↓
+Special lock
+```
+
+Your private key is the physical key:
+
+```text
+id_rsa
+```
+
+Your public key corresponds to the lock:
+
+```text
+id_rsa.pub
+```
+
+The important rule is:
+
+> **The private key should never be shared.**
+
+---
+
+# 16. Why Does an SSH Private Key Have a Password?
+
+You might wonder:
+
+> "If the private key is already a key, why does it need another password?"
+
+Because the private key itself can be protected with a **passphrase**.
+
+Imagine someone steals your physical house key.
+
+If that key immediately opens your house, the thief can use it.
+
+But imagine the key is kept inside a small safe that requires another combination:
+
+```text
+Private key
+    +
+Passphrase
+    ↓
+Usable SSH credential
+```
+
+The passphrase provides an additional layer of protection.
+
+So stealing an encrypted private key does not necessarily mean the attacker can immediately use it.
+
+---
+
+## 16.1 The Important Distinction
+
+There are two different secrets involved in some SSH setups:
+
+```text
+SSH account password
+```
+
+and:
+
+```text
+Private-key passphrase
+```
+
+They are **not necessarily the same thing**.
+
+For example:
+
+```text
+SSH username:
+alice
+
+SSH account password:
+SomeAccountPassword
+
+Private key:
+id_rsa
+
+Private key passphrase:
+SomeKeyPassphrase
+```
+
+John's role in this scenario is to test candidates against the **private-key passphrase protection**, not magically recover the server's account password.
+
+---
+
+# 17. What Does `ssh2john` Do?
+
+John cannot simply treat an `id_rsa` file like an ordinary password hash.
+
+This is where:
+
+```text
+ssh2john
+```
+
+comes in.
+
+`ssh2john` extracts the relevant password-verification information from the SSH private key and converts it into a format John understands.
+
+### Analogy: Changing the Packaging
+
+Imagine you have a product inside a box:
+
+```text
+SSH private key
+```
+
+John doesn't know how to directly process that particular box.
+
+`ssh2john` repackages the relevant information:
+
+```text
+SSH private key
+       ↓
+   ssh2john
+       ↓
+John-readable representation
+```
+
+John can then work with the resulting file.
+
+The private key itself isn't being "turned into a password."
+
+Rather, information needed to **verify password guesses against the protected key** is extracted into a format John can process.
+
+---
+
+# 18. Using `ssh2john`
+
+The basic syntax is:
+
+```bash
+ssh2john [private-key-file] > [output-file]
+```
+
+For example:
+
+```bash
+ssh2john id_rsa > id_rsa_hash.txt
+```
+
+Let's break this down.
+
+### `ssh2john`
+
+Runs the conversion utility.
+
+### `id_rsa`
+
+The SSH private key being processed.
+
+### `>`
+
+Redirects the command's output into another file.
+
+### `id_rsa_hash.txt`
+
+Stores the John-readable output.
+
+So the workflow looks like:
+
+```text
+id_rsa
+  │
+  ▼
+ssh2john
+  │
+  ▼
+id_rsa_hash.txt
+```
+
+---
+
+# 19. What If `ssh2john` Isn't Available?
+
+Depending on how John was installed, the conversion utility may be provided as a Python script instead of a directly executable command.
+
+You may encounter:
+
+```text
+ssh2john.py
+```
+
+For example, an installation might provide it somewhere under John's installation directory.
+
+A common form is:
+
+```bash
+python3 /path/to/ssh2john.py id_rsa > id_rsa_hash.txt
+```
+
+The exact path depends on your installation.
+
+You can locate the utility using your system's normal package/file lookup tools rather than assuming a particular path.
+
+---
+
+# 20. Cracking the Converted Key Data
+
+Once the conversion is complete, the resulting file can be supplied to John.
+
+For example:
+
+```bash
+john --wordlist=/path/to/wordlist.txt id_rsa_hash.txt
+```
+
+With a commonly available wordlist, the workflow is:
+
+```text
+             id_rsa
+                │
+                ▼
+            ssh2john
+                │
+                ▼
+        id_rsa_hash.txt
+                │
+                ▼
+             John
+                │
+                ▼
+       Candidate testing
+                │
+                ▼
+        Matching passphrase
+```
+
+This is essentially the same architecture we used with ZIP and RAR archives.
+
+---
+
+# 21. Why Does This Work?
+
+The important concept is that John doesn't need to know the original passphrase.
+
+Instead, the protected key contains information that allows a candidate passphrase to be checked.
+
+Conceptually:
+
+```text
+Candidate password
+       ↓
+   Key derivation /
+   verification process
+       ↓
+Does it match?
+   ↙       ↘
+ YES       NO
+```
+
+John automates this process for many candidate passwords.
+
+This is the same general principle behind password-hash cracking:
+
+```text
+Guess → Transform/derive → Compare → Repeat
+```
+
+---
+
+# 22. Combining SSH Key Cracking with Wordlists
+
+Suppose you have an authorized private key and a wordlist containing:
+
+```text
+password
+letmein
+football
+welcome
+monkey
+```
+
+A basic wordlist attack tests those candidates.
+
+But real passwords are often modified:
+
+```text
+Password1!
+Football123
+Welcome@
+Monkey2026!
+```
+
+This is where the **custom rules** discussed earlier become useful.
+
+Conceptually:
+
+```text
+Wordlist
+   ↓
+Custom rule
+   ↓
+Password candidates
+   ↓
+SSH private-key verification
+   ↓
+Match / no match
+```
+
+For example, you could use a previously defined John rule:
+
+```bash
+john --wordlist=/path/to/wordlist.txt --rule=RuleName id_rsa_hash.txt
+```
+
+This combines two ideas:
+
+- **Wordlist** → provides base words.
+- **Rule** → generates structured variations.
+
+---
+
+# 23. Search-Space Thinking
+
+Custom rules can generate a large number of candidates.
+
+Suppose your rule adds:
+
+```text
+10 possible digits
+```
+
+and:
+
+```text
+5 possible symbols
+```
+
+For every word, that produces:
+
+```text
+10 × 5 = 50
+```
+
+variations.
+
+If the wordlist contains:
+
+```text
+100,000 words
+```
+
+then the rule could potentially generate:
+
+```text
+100,000 × 50
+= 5,000,000
+```
+
+candidate passwords.
+
+This matters because each candidate requires work to verify against the protected SSH key.
+
+### Analogy: Combination lock
+
+Imagine a lock with:
+
+```text
+10 choices on wheel 1
+5 choices on wheel 2
+```
+
+There are:
+
+```text
+10 × 5 = 50
+```
+
+possible combinations.
+
+Adding another wheel multiplies the possibilities again.
+
+Password rules work similarly.
+
+---
+
+# 24. A Practical Authorized Workflow
+
+For an SSH private key that you are authorized to test:
+
+### Step 1 — Identify the private key
+
+Example:
+
+```text
+id_rsa
+```
+
+### Step 2 — Convert it
+
+```bash
+ssh2john id_rsa > id_rsa_hash.txt
+```
+
+### Step 3 — Choose a candidate source
+
+For example:
+
+```text
+wordlist.txt
+```
+
+### Step 4 — Run John
+
+```bash
+john --wordlist=/path/to/wordlist.txt id_rsa_hash.txt
+```
+
+### Step 5 — If appropriate, use a custom rule
+
+```bash
+john --wordlist=/path/to/wordlist.txt --rule=RuleName id_rsa_hash.txt
+```
+
+The complete process is:
+
+```text
+        SSH private key
+              │
+              ▼
+          ssh2john
+              │
+              ▼
+      John-readable data
+              │
+              ▼
+          Wordlist
+              │
+              ▼
+        Custom rules
+              │
+              ▼
+      Password candidates
+              │
+              ▼
+     Private-key verification
+              │
+        ┌─────┴─────┐
+        ▼           ▼
+      Match       No match
+```
+
+---
+
+# 25. ZIP, RAR, and SSH: The Same Big Picture
+
+At this point, the individual tools may look different:
+
+```text
+zip2john
+rar2john
+ssh2john
+```
+
+But conceptually, they all perform the same job.
+
+They act as **format adapters**.
+
+| Protected format | Converter | Output |
+|---|---|---|
+| ZIP | `zip2john` | John-readable data |
+| RAR | `rar2john` | John-readable data |
+| SSH private key | `ssh2john` | John-readable data |
+
+Then:
+
+```text
+Format-specific converter
+          ↓
+John-readable representation
+          ↓
+John
+          ↓
+Candidate testing
+```
+
+### The key lesson
+
+Don't memorize these utilities as unrelated commands.
+
+Remember the pattern:
+
+> **Convert first, crack second.**
+
+---
+
+# 26. Security Perspective
+
+This technique also demonstrates an important defensive lesson.
+
+A private SSH key should be protected carefully.
+
+Good practices include:
+
+- Protecting private keys with strong passphrases.
+- Keeping private keys out of public repositories.
+- Restricting file permissions.
+- Never sharing private keys unnecessarily.
+- Removing compromised keys from authorized systems.
+- Using modern SSH key types and secure configurations.
+- Rotating/replacing keys when compromise is suspected.
+
+A strong private-key passphrase increases the difficulty of offline guessing attacks.
+
+---
+
+# 27. Key Takeaways
+
+### `id_rsa`
+
+Traditionally refers to an SSH RSA private-key file. The filename alone does **not** guarantee that every SSH private key uses the same format or encryption scheme.
+
+### Private key
+
+The secret component of an SSH key pair.
+
+```text
+Private key → Keep secret
+Public key  → Can be distributed
+```
+
+### Passphrase
+
+An optional password protecting the private key itself.
+
+### `ssh2john`
+
+Converts supported SSH private-key information into a representation John can process.
+
+### John
+
+Tests password candidates against the converted data.
+
+---
+
+## The Mental Model
+
+If you remember only one thing, remember this:
+
+```text
+             PRIVATE KEY
+                  │
+                  ▼
+             ssh2john
+                  │
+                  ▼
+       JOHN-READABLE DATA
+                  │
+                  ▼
+             WORDLIST
+                  │
+                  ▼
+          CUSTOM RULES
+                  │
+                  ▼
+       PASSWORD CANDIDATES
+                  │
+                  ▼
+          JOHN VERIFIES
+                  │
+           ┌──────┴──────┐
+           ▼             ▼
+         Match         No match
+```
+
+John isn't magically "decrypting" the private key.
+
+It is systematically testing candidate passphrases against the password-protection mechanism represented in the converted data.
+
+And just like ZIP and RAR, the conversion utility is what bridges the gap between the original file format and John's cracking engine.
