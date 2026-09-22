@@ -2,7 +2,7 @@
 
 > Practical, beginner-friendly notes covering Snort, IDS concepts, operating modes, configuration, rules, custom detections, live monitoring, PCAP analysis, alert tuning, troubleshooting, and SOC workflows.
 
-## ⚠️ Safety & Lab Notice
+## Safety & Lab Notice
 
 Use Snort only on networks and systems you own or are explicitly authorized to monitor. Practice custom rules with controlled traffic and test data.
 
