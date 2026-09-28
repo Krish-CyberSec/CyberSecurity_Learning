@@ -2,7 +2,7 @@
 
 > Practical study notes for authorized malware-analysis and DFIR labs.
 
-## ⚠️ Safety
+## Safety
 
 Use suspicious documents, binaries, and memory images only in an isolated lab/VM. Do not execute unknown malware on a normal host or against real systems. The IPs, URLs, and payload names in the source material are lab indicators.
 
