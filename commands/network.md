@@ -1,4 +1,4 @@
-## 1. TO get the info of service running with the port number (detailed info)
+## 1. To get the info on services running with the port number (detailed info)
 ```
 netstat -abon 
 ```
