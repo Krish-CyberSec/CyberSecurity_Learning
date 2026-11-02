@@ -1,0 +1,15 @@
+{
+    "Domain":"DMC.com",
+    "groups": [
+        {
+            "name": "Engineering"
+        }
+    ],
+    "users":[
+        {
+            "name":"Alex Leu",
+            "password":"P@ssword123",
+            "groups":["Engineering"]
+        }
+    ]
+}
