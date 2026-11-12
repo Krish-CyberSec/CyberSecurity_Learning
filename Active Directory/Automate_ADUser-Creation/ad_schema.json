@@ -1,10 +1,6 @@
 {
     "Domain":"DMC.com",
-    "groups": [
-        {
-            "name": "Engineering"
-        }
-    ],
+    "groups": ["Engineering"],
     "users":[
         {
             "name":"Alex Leu",

@@ -33,21 +33,18 @@ function CreateADGroup {
 
     param(
         [Parameter(Mandatory = $true)]
-        $groupObject
+        [string]$groupName
     )
-
-    # Extract the group name from the JSON object
-    $name = $groupObject.name
 
     try {
 
         # Check whether the group already exists
         $existingGroup = Get-ADGroup `
-            -Filter "Name -eq '$name'" `
+            -Filter "Name -eq '$groupName'" `
             -ErrorAction SilentlyContinue
 
         if ($existingGroup) {
-            Write-Warning "Group '$name' already exists. Skipping creation."
+            Write-Warning "Group '$groupName' already exists. Skipping creation."
             return
         }
 
@@ -56,18 +53,18 @@ function CreateADGroup {
         # GroupCategory: Security
 
         New-ADGroup `
-            -Name $name `
+            -Name $groupName `
             -GroupScope Global `
             -GroupCategory Security `
             -ErrorAction Stop
 
-        Write-Host "[SUCCESS] Group created: $name" -ForegroundColor Green
+        Write-Host "[SUCCESS] Group created: $groupName" -ForegroundColor Green
 
     }
     catch {
 
         # Display the actual error if group creation fails
-        Write-Warning "[ERROR] Could not create group '$name': $_"
+        Write-Warning "[ERROR] Could not create group '$groupName': $_"
 
     }
 }

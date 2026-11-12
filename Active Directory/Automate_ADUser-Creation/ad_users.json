@@ -1,0 +1,63 @@
+﻿{
+    "Domain":  "DMC.com",
+    "groups":  [
+                   "Audit",
+                   "Employees",
+                   "Marketing",
+                   "Lawer",
+                   "Developers",
+                   "Intern",
+                   "Managers"
+               ],
+    "users":  [
+                  {
+                      "name":  "Bette-Ann Alsop",
+                      "password":  "pastor",
+                      "groups":  [
+                                     "Lawer"
+                                 ]
+                  },
+                  {
+                      "name":  "Wandie Lyman",
+                      "password":  "password1",
+                      "groups":  [
+                                     "Audit"
+                                 ]
+                  },
+                  {
+                      "name":  "Vinni Wright",
+                      "password":  "drummer",
+                      "groups":  [
+                                     "Managers"
+                                 ]
+                  },
+                  {
+                      "name":  "Merridie North",
+                      "password":  "bobbob",
+                      "groups":  [
+                                     "Employees"
+                                 ]
+                  },
+                  {
+                      "name":  "Sandra Ince",
+                      "password":  "playboi",
+                      "groups":  [
+                                     "Marketing"
+                                 ]
+                  },
+                  {
+                      "name":  "Kath Allan",
+                      "password":  "teresita",
+                      "groups":  [
+                                     "Intern"
+                                 ]
+                  },
+                  {
+                      "name":  "Sascha Forsyth",
+                      "password":  "doggy1",
+                      "groups":  [
+                                     "Developers"
+                                 ]
+                  }
+              ]
+}
